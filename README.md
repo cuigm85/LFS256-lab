@@ -171,7 +171,11 @@ kubectl argo rollouts version
 
 ## Lab 5.2 - Argo Rollouts Blue-Green
 
+### Creating Blue-Green Deployments with Argo Rollouts
+
 ```
+# Install Resources
+
 kubectl get rollout
 # No resources found in default namespace.
 
@@ -205,4 +209,48 @@ spec:
 EOF
 
 # rollout.argoproj.io/rollout-bluegreen created
+
+# 확인
+kubectl get rollout
+kubectl argo rollouts get ro rollout-bluegreen
+```
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rollout-bluegreen-active
+  name: rollout-bluegreen-active
+spec:
+  ports:
+  - name: "80"
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: rollout-bluegreen
+  type: ClusterIP
+EOF
+```
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rollout-bluegreen-preview
+  name: rollout-bluegreen-preview
+spec:
+  ports:
+  - name: "80"
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: rollout-bluegreen
+  type: ClusterIP
+EOF
 ```
