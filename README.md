@@ -63,7 +63,7 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 ```
 # 서버 접근 설정 ingress
-cat <<EOF | tee argocd-ingress.yaml
+cat <<EOF | tee argocd-ingress-v1.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -88,5 +88,35 @@ spec:
               number: 443
 EOF
 
-kubectl apply -f argocd-ingress.yaml
+kubectl apply -f argocd-ingress-v1.yaml
+```
+```
+# 서버 접근 설정 ingress
+cat <<EOF | tee argocd-ingress-v2.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-ingress
+  namespace: argocd
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "argocd.localhost"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              number: 443
+EOF
+
+kubectl apply -f argocd-ingress-v2.yaml
 ```
