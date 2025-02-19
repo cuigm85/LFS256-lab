@@ -30,7 +30,7 @@ EOF
 helm upgrade --install ingress-nginx ./ingress-nginx --namespace ingress-nginx --create-namespace -f values.yaml
 ```
 
-# ARGO CD
+# Argo CD
 [REF1](https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md)
 
 ## Lab 3.1 - Installing Argo CD
@@ -38,7 +38,7 @@ helm upgrade --install ingress-nginx ./ingress-nginx --namespace ingress-nginx -
 ### 3.1.1 Deploy Argo CD to Kubernetes
 
 ```
-# NS생성
+# NS 생성
 kubectl create namespace argocd
 
 # 설치
@@ -119,4 +119,27 @@ spec:
 EOF
 
 kubectl apply -f argocd-ingress-v2.yaml
+```
+
+# Argo Rollouts
+
+## Lab 5.1 - Installing Argo Rollouts
+
+```
+# NS 생성
+kubectl create namespace argo-rollouts
+
+
+# 설치
+kubectl apply -n argo-rollouts -f \
+  https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+# 확인
+kubectl get pods -n argo-rollouts
+```
+
+```
+curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+chmod +x ./kubectl-argo-rollouts-linux-amd64
+sudo mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
 ```
