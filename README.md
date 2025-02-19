@@ -354,4 +354,13 @@ kubectl -n argo-events apply -f \
 # Expose event-source pod
 kubectl -n argo-events port-forward \
   $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
+
+curl -d '{"message":"this is my first webhook"}' \
+  -H "Content-Type:application/json" \
+  -X POST http://localhost:12000/example
+```
+
+```
+kubectl -n argo-events apply -f https://raw.githubusercontent.com/lftraining/LFS256-code/main/argoevents/pulsar.yaml
+kubectl get pods -n argo-events
 ```
