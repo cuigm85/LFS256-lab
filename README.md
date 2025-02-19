@@ -31,6 +31,7 @@ helm upgrade --install ingress-nginx ./ingress-nginx --namespace ingress-nginx -
 ```
 
 # Argo CD
+
 [REF1](https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md)
 
 ## Lab 3.1 - Installing Argo CD
@@ -57,10 +58,12 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o \
 jsonpath="{.data.password}" | base64 -d; echo
 # 샘플 출력: 2bVRZRB7WFuKo43d
 ```
+
 ```
 # 서버 접근 설정 port-forward
 kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
+
 ```
 # 서버 접근 설정 ingress
 cat <<EOF | tee argocd-ingress-v1.yaml
@@ -90,6 +93,7 @@ EOF
 
 kubectl apply -f argocd-ingress-v1.yaml
 ```
+
 ```
 # 서버 접근 설정 ingress
 cat <<EOF | tee argocd-ingress-v2.yaml
@@ -125,6 +129,8 @@ kubectl apply -f argocd-ingress-v2.yaml
 
 ## Lab 5.1 - Installing Argo Rollouts
 
+### Deploy Argo Ro
+
 ```
 # NS 생성
 kubectl create namespace argo-rollouts
@@ -138,8 +144,65 @@ kubectl apply -n argo-rollouts -f \
 kubectl get pods -n argo-rollouts
 ```
 
+### Install Rollouts kubectl Plugin
+
+[https://argoproj.github.io/argo-rollouts/installation/](https://argoproj.github.io/argo-rollouts/installation/)
+
 ```
+# 설치
 curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
 chmod +x ./kubectl-argo-rollouts-linux-amd64
 sudo mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+
+# 확인
+kubectl argo rollouts version
+```
+
+```
+# 자동완성
+# source <(kubectl-argo-rollouts completion bash)
+
+# 사용법 예시
+# kubectl get rollout
+# kubectl argo rollouts get rollout
+# kubectl argo rollouts promote
+# kubectl argo rollouts undo
+```
+
+## Lab 5.2 - Argo Rollouts Blue-Green
+
+```
+kubectl get rollout
+# No resources found in default namespace.
+
+cat <<EOF | kubectl apply -f -
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollout-bluegreen
+spec:
+  replicas: 2
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: rollout-bluegreen
+  template:
+    metadata:
+      labels:
+        app: rollout-bluegreen
+    spec:
+      containers:
+      - name: rollouts-demo
+        image: argoproj/rollouts-demo:blue
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+  strategy:
+    blueGreen:
+      activeService: rollout-bluegreen-active
+      previewService: rollout-bluegreen-preview
+      autoPromotionEnabled: false
+EOF
+
+# rollout.argoproj.io/rollout-bluegreen created
 ```
