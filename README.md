@@ -287,3 +287,32 @@ spec:
       autoPromotionEnabled: false
 EOF
 ```
+
+## Lab 5.3 - Migrating an Existing Deployment to Argo Rollouts
+
+```
+kubectl create deploy nginx-deployment --image=nginx --replicas=3
+```
+
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: nginx-rollout
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deployment
+  workloadRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-deployment
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 10s}
+EOF
+```
