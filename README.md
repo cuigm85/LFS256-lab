@@ -316,3 +316,42 @@ spec:
       - pause: {duration: 10s}
 EOF
 ```
+
+## Lab 6.1 - Setting Up Event Triggers with Argo
+
+```
+kubectl patch deployment argo-server --namespace argo --type='json' \
+-p='[{"op": "replace", "path":
+"/spec/template/spec/containers/0/args", "value": ["server",
+"--auth-mode=server"]}]'
+```
+
+```
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
+# Install with a validating admission controller
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install-validating-webhook.yaml
+
+# EventBus
+kubectl -n argo-events apply -f \
+  https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/eventbus/native.yaml
+
+# EventSource
+kubectl -n argo-events apply -f \
+  https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
+
+# Sensor RBAC
+kubectl apply -n argo-events -f \
+  https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/sensor-rbac.yaml
+
+# Workflow RBAC
+kubectl apply -n argo-events -f \
+  https://raw.githubusercontent.com/argoproj/argo-events/master/examples/rbac/workflow-rbac.yaml
+
+# Webhook
+kubectl -n argo-events apply -f \
+  https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
+
+# Expose event-source pod
+kubectl -n argo-events port-forward \
+  $(kubectl -n argo-events get pod -l eventsource-name=webhook -o name) 12000:12000 &
+```
