@@ -30,12 +30,13 @@ EOF
 helm upgrade --install ingress-nginx ./ingress-nginx --namespace ingress-nginx --create-namespace -f values.yaml
 ```
 
-## ARGO CD
+# ARGO CD
 [REF1](https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md)
 
-### Lab 3.1 - Installing Argo CD
+## Lab 3.1 - Installing Argo CD
 
-Deploy Argo CD to Kubernetes
+### 3.1.1 Deploy Argo CD to Kubernetes
+
 ```
 # NS생성
 kubectl create namespace argocd
@@ -48,16 +49,20 @@ kubectl apply -n argocd -f \
 kubectl get pods -n argocd
 ```
 
-Accessing Argo CD
+### 3.1.2 Accessing Argo CD
+
 ```
 # 초기 암호 확인
 kubectl -n argocd get secret argocd-initial-admin-secret -o \
 jsonpath="{.data.password}" | base64 -d; echo
 # 샘플 출력: 2bVRZRB7WFuKo43d
-
-# 서버 접근 설정
-# kubectl port-forward svc/argocd-server -n argocd 8080:443
-
+```
+```
+# 서버 접근 설정 port-forward
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+```
+# 서버 접근 설정 ingress
 cat <<EOF | tee argocd-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -84,6 +89,4 @@ spec:
 EOF
 
 kubectl apply -f argocd-ingress.yaml
-
-
 ```
